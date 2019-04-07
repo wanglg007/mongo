@@ -582,17 +582,17 @@ ExitCode _initAndListen(int listenPort) {
             log() << " For more info see http://dochub.mongodb.org/core/ttlcollections";
             log() << startupWarningsLog;
         } else {
-            startTTLBackgroundJob();
+            startTTLBackgroundJob();                //创建索引时设置一个超时时间
         }
 
         if (replSettings.usingReplSets() || !gInternalValidateFeaturesAsMaster) {
             serverGlobalParams.validateFeaturesAsMaster.store(false);
         }
     }
-
+    //报告内存使用情况和过时过时删除客户端游标的线程
     startClientCursorMonitor();
 
-    PeriodicTask::startRunningPeriodicTasks();
+    PeriodicTask::startRunningPeriodicTasks();      //执行任务的线程，其它部分向它提交任务
 
     SessionKiller::set(serviceContext,
                        std::make_shared<SessionKiller>(serviceContext, killSessionsLocal));
@@ -1040,7 +1040,7 @@ int mongoDbMain(int argc, char* argv[], char** envp) {      //mongos对应mongoS
     }
 #endif
 
-    StartupTest::runTests();
+    StartupTest::runTests();                                        //启动测试
     ExitCode exitCode = initAndListen(serverGlobalParams.port);     //启动侦听方法，开始侦听客户端的链接请求
     exitCleanly(exitCode);
     return 0;
