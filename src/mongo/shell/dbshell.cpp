@@ -26,7 +26,7 @@
  *    exception statement from all source files in the program, then also delete
  *    it in the license file.
  */
-
+//mongo是mongodb的一个C++写的javascript交互式的可执行客户端。mongo的启动代码在mongo/shell/dbshell.cpp中。
 #define MONGO_LOG_DEFAULT_COMPONENT ::mongo::logger::LogComponent::kDefault
 
 #include "mongo/platform/basic.h"
@@ -899,7 +899,7 @@ int _main(int argc, char* argv[], char** envp) {
         if (mongo::serverGlobalParams.quiet.load()) {
             ss << "__quiet = true;" << std::endl;
         }
-
+        //如果启动时没有指定nodb,那么这里将生成一串javascript代码,用来连接mongod
         ss << "db = connect( \"" << parsedURI.canonicalizeURIAsString() << "\");" << std::endl;
 
         if (shellGlobalParams.shouldRetryWrites || parsedURI.getRetryWrites()) {
@@ -912,7 +912,7 @@ int _main(int argc, char* argv[], char** envp) {
         mongo::shell_utils::_dbConnect += ss.str();
     }
 
-    mongo::ScriptEngine::setConnectCallback(mongo::shell_utils::onConnect);
+    mongo::ScriptEngine::setConnectCallback(mongo::shell_utils::onConnect);     //该回调函数用来做连接成功后的记录工作
     mongo::ScriptEngine::setup();
     mongo::getGlobalScriptEngine()->setJSHeapLimitMB(shellGlobalParams.jsHeapLimitMB);
     mongo::getGlobalScriptEngine()->setScopeInitCallback(mongo::shell_utils::initScope);

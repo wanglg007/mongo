@@ -26,7 +26,7 @@
  *    exception statement from all source files in the program, then also delete
  *    it in the license file.
  */
-
+//mongod是mongodb的存储服务器，其代码入口在mongo/db/db.cpp中。
 #define MONGO_LOG_DEFAULT_COMPONENT ::mongo::logger::LogComponent::kStorage
 
 #include "mongo/platform/basic.h"

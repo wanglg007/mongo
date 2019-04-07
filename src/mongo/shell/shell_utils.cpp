@@ -333,7 +333,7 @@ void initScope(Scope& scope) {
     scope.injectNative("_shouldUseImplicitSessions", shouldUseImplicitSessions);
     scope.externalSetup();
     mongo::shell_utils::installShellUtils(scope);
-    scope.execSetup(JSFiles::servers);
+    scope.execSetup(JSFiles::servers);          //执行相应的javascript文件，相当于初始化javascript环境
     scope.execSetup(JSFiles::shardingtest);
     scope.execSetup(JSFiles::servers_misc);
     scope.execSetup(JSFiles::replsettest);
@@ -344,7 +344,7 @@ void initScope(Scope& scope) {
     scope.injectNative("benchStart", BenchRunner::benchStart);
     scope.injectNative("benchFinish", BenchRunner::benchFinish);
 
-    if (!_dbConnect.empty()) {
+    if (!_dbConnect.empty()) {                  //执行登录代码
         uassert(12513, "connect failed", scope.exec(_dbConnect, "(connect)", false, true, false));
     }
 }
