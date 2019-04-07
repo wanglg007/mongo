@@ -145,7 +145,7 @@ private:
      * Map of all named nodes.  Nodes named as prerequisites or dependents but not explicitly
      * added via addInitializer will either be absent from this map or be present with
      * NodeData::fn set to a false-ish value.
-     */
+     *///InitializerDependencyGraph::addInitializer中添加,和测试相关的测试信息都存到这里面
     NodeMap _nodes;
 };
 

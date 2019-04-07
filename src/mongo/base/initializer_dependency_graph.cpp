@@ -55,11 +55,11 @@ Status InitializerDependencyGraph::addInitializer(std::string name,
     newNode.deinitFn = std::move(deinitFn);
 
     for (size_t i = 0; i < prerequisites.size(); ++i) {
-        newNode.prerequisites.insert(prerequisites[i]);
+        newNode.prerequisites.insert(prerequisites[i]);   //添加
     }
 
     for (size_t i = 0; i < dependents.size(); ++i) {
-        _nodes[dependents[i]].prerequisites.insert(name);
+        _nodes[dependents[i]].prerequisites.insert(name); //添加
     }
 
     return Status::OK();

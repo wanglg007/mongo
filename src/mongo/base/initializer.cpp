@@ -43,7 +43,7 @@ namespace mongo {
 
 Initializer::Initializer() {}
 Initializer::~Initializer() {}
-
+//args命令行参数，env系统环境变量信息
 Status Initializer::executeInitializers(const InitializerContext::ArgumentVector& args,
                                         const InitializerContext::EnvironmentMap& env) {
     std::vector<std::string> sortedNodes;
@@ -113,14 +113,14 @@ Status runGlobalInitializers(const InitializerContext::ArgumentVector& args,
                              const InitializerContext::EnvironmentMap& env) {
     return getGlobalInitializer().executeInitializers(args, env);
 }
-
+//主要解析命令行，即启动参数，其中会读取配置文件，解析参数并赋值给变量，比如“cpu”，“noauth”，“quota”，“repair path”，“nohints”等。
 Status runGlobalInitializers(int argc, const char* const* argv, const char* const* envp) {
     InitializerContext::ArgumentVector args(argc);
-    std::copy(argv, argv + argc, args.begin());
+    std::copy(argv, argv + argc, args.begin());         //拷贝命令行参数到args数组
 
     InitializerContext::EnvironmentMap env;
 
-    if (envp) {
+    if (envp) {                                         //envp存储的是export设置的环境变量信息存入env map表中
         for (; *envp; ++envp) {
             const char* firstEqualSign = strchr(*envp, '=');
             if (!firstEqualSign) {

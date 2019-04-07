@@ -37,7 +37,7 @@
 #include "mongo/base/data_type.h"
 
 namespace mongo {
-
+//mongodb头部外的报文体内容相关
 class ConstDataView {
 public:
     typedef const char* bytes_type;
