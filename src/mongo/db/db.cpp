@@ -190,7 +190,7 @@ using logger::LogComponent;
 using std::endl;
 
 namespace {
-
+//startup_log集合表示的是mongod实例每次的启动信息
 const NamespaceString startupLogCollectionName("local.startup_log");
 
 #ifdef _WIN32
@@ -258,10 +258,10 @@ void initWireSpec() {
 MONGO_FAIL_POINT_DEFINE(shutdownAtStartup);
 
 ExitCode _initAndListen(int listenPort) {
-    Client::initThread("initandlisten");
+    Client::initThread("initandlisten");            //注意这是main线程,设置当前线程的名
 
     initWireSpec();
-    auto serviceContext = getGlobalServiceContext();
+    auto serviceContext = getGlobalServiceContext();//获取serviceContext类
 
     serviceContext->setFastClockSource(FastClockSourceFactory::create(Milliseconds(10)));
     auto opObserverRegistry = stdx::make_unique<OpObserverRegistry>();
@@ -280,37 +280,38 @@ ExitCode _initAndListen(int listenPort) {
     serviceContext->setOpObserver(std::move(opObserverRegistry));
 
     DBDirectClientFactory::get(serviceContext).registerImplementation([](OperationContext* opCtx) {
-        return std::unique_ptr<DBClientBase>(new DBDirectClient(opCtx));
+        return std::unique_ptr<DBClientBase>(new DBDirectClient(opCtx));        //获取DBDirectClient类
     });
-
+    //获取ReplicationCoordinatorImpl::_settings
     const repl::ReplSettings& replSettings =
         repl::ReplicationCoordinator::get(serviceContext)->getSettings();
 
     {
-        ProcessId pid = ProcessId::getCurrent();
+        ProcessId pid = ProcessId::getCurrent();                                //获取当前进程ID并输出进程ID及数据库路径
         LogstreamBuilder l = log(LogComponent::kControl);
         l << "MongoDB starting : pid=" << pid << " port=" << serverGlobalParams.port
           << " dbpath=" << storageGlobalParams.dbpath;
 
-        const bool is32bit = sizeof(int*) == 4;
+        const bool is32bit = sizeof(int*) == 4;                                 //接着判断当前系统是32或64位系统？
         l << (is32bit ? " 32" : " 64") << "-bit host=" << getHostNameCached() << endl;
     }
 
-    DEV log(LogComponent::kControl) << "DEBUG build (which is slower)" << endl;
+    DEV log(LogComponent::kControl) << "DEBUG build (which is slower)" << endl; //是否启用了DEBUG编译
 
 #if defined(_WIN32)
     VersionInfoInterface::instance().logTargetMinOS();
 #endif
 
     logProcessDetails();
-
+    //构造ServiceEntryPointMongod类，然后调用setServiceEntryPoint
     serviceContext->setServiceEntryPoint(
         stdx::make_unique<ServiceEntryPointMongod>(serviceContext));
 
     if (!storageGlobalParams.repair) {
+        //根据serverGlobalParams全局配置信息构造tl为TransportLayerManager类
         auto tl =
             transport::TransportLayerManager::createWithConfig(&serverGlobalParams, serviceContext);
-        auto res = tl->setup();
+        auto res = tl->setup();                                                 //创建套接字并bind
         if (!res.isOK()) {
             error() << "Failed to set up listener: " << res;
             return EXIT_NET_ERROR;
@@ -344,7 +345,7 @@ ExitCode _initAndListen(int listenPort) {
             }
 
             // Warn if field name matches non-active registered storage engine.
-            if (isRegisteredStorageEngine(serviceContext, e.fieldName())) {
+            if (isRegisteredStorageEngine(serviceContext, e.fieldName())) {     //必须是指定的几种存储引擎
                 warning() << "Detected configuration for non-active storage engine "
                           << e.fieldName() << " when current storage engine is "
                           << storageGlobalParams.engine;
@@ -368,7 +369,7 @@ ExitCode _initAndListen(int listenPort) {
               << "storage.journal.enabled is not set to 'false'.";
         exitCleanly(EXIT_BADOPTIONS);
     }
-
+    //配置做些检查，打印一些提示信息
     logMongodStartupWarnings(storageGlobalParams, serverGlobalParams, serviceContext);
 
 #ifdef MONGO_CONFIG_SSL
@@ -382,7 +383,7 @@ ExitCode _initAndListen(int listenPort) {
         log() << startupWarningsLog;
     }
 #endif
-
+    //mongodb就会对相应路径下的数据文件进行检查，如出现文件错误（文件不存在等）
     {
         std::stringstream ss;
         ss << endl;
@@ -396,7 +397,7 @@ ExitCode _initAndListen(int listenPort) {
 
     initializeSNMP();
 
-    if (!storageGlobalParams.readOnly) {
+    if (!storageGlobalParams.readOnly) {                //移除指定路径下的临时文件夹信
         boost::filesystem::remove_all(storageGlobalParams.dbpath + "/_tmp/");
     }
 
@@ -687,7 +688,7 @@ ExitCode initService() {
     return initAndListen(serverGlobalParams.port);
 }
 #endif
-
+//全局的类，在进入main前就会执行
 MONGO_INITIALIZER_GENERAL(ForkServer, ("EndStartupOptionHandling"), ("default"))
 (InitializerContext* context) {
     mongo::forkServerOrDie();
@@ -991,7 +992,7 @@ void shutdownTask() {
     audit::logShutdown(client);
 }
 
-int mongoDbMain(int argc, char* argv[], char** envp) {
+int mongoDbMain(int argc, char* argv[], char** envp) {      //mongos对应mongoSMain
     registerShutdownTask(shutdownTask);
 
     setupSignalHandlers();
@@ -1030,7 +1031,7 @@ int mongoDbMain(int argc, char* argv[], char** envp) {
 
     // Per SERVER-7434, startSignalProcessingThread must run after any forks (i.e.
     // initializeServerGlobalState) and before the creation of any other threads
-    startSignalProcessingThread();
+    startSignalProcessingThread();                                  //信号处理线程
 
 #if defined(_WIN32)
     if (ntservice::shouldStartService()) {
@@ -1040,7 +1041,7 @@ int mongoDbMain(int argc, char* argv[], char** envp) {
 #endif
 
     StartupTest::runTests();
-    ExitCode exitCode = initAndListen(serverGlobalParams.port);
+    ExitCode exitCode = initAndListen(serverGlobalParams.port);     //启动侦听方法，开始侦听客户端的链接请求
     exitCleanly(exitCode);
     return 0;
 }
