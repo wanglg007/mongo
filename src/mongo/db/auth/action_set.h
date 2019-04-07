@@ -93,7 +93,7 @@ public:
 
 private:
     // bitmask of actions this privilege grants
-    std::bitset<ActionType::NUM_ACTION_TYPES> _actions;
+    std::bitset<ActionType::NUM_ACTION_TYPES> _actions;     //位操作,为1表示支持该action,可以参考ActionSet::addAllActions
 };
 
 static inline bool operator==(const ActionSet& lhs, const ActionSet& rhs) {

@@ -1170,6 +1170,7 @@ int _main(int argc, char* argv[], char** envp) {
 
             if (!wascmd) {
                 try {
+                    //执行相应的javascript代码
                     lastLineSuccessful = scope->exec(code.c_str(), "(shell)", false, true, false);
                     if (lastLineSuccessful) {
                         scope->exec(

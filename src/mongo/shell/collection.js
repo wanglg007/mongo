@@ -212,7 +212,8 @@ DBCollection.prototype._massageObject = function(q) {
     throw Error("don't know how to massage : " + type);
 
 };
-
+//因为设置query,所以其它选项都是空的，this.getQueryOptions()目前只有一个SlaveOK的option，在replset模式下是不能查询
+//secondary服务器的，需要调用rs.SlaveOK()之后才能对secondary进行查询，其执行SlaveOK后每次查询时都会添加一个QueryOption.
 DBCollection.prototype.find = function(query, fields, limit, skip, batchSize, options) {
     var cursor = new DBQuery(this._mongo,
                              this._db,
